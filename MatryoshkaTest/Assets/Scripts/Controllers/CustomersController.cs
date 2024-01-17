@@ -1,11 +1,8 @@
 using UnityEngine;
-
 using System;
 using System.Collections.Generic;
 using System.Linq;
-
 using Random = UnityEngine.Random;
-
 using CookingPrototype.Kitchen;
 
 namespace CookingPrototype.Controllers {
@@ -27,6 +24,8 @@ namespace CookingPrototype.Controllers {
 
 		float _timer = 0f;
 		Stack<List<Order>> _orderSets;
+
+		private List<Customer> _spawnedCustomers;
 
 		bool HasFreePlaces {
 			get { return CustomerPlaces.Any(x => x.IsFree); }
@@ -89,6 +88,8 @@ namespace CookingPrototype.Controllers {
 			var orders = _orderSets.Pop();
 			customer.Init(orders);
 
+			_spawnedCustomers.Add(customer);
+
 			return customer;
 		}
 
@@ -100,6 +101,7 @@ namespace CookingPrototype.Controllers {
 		public void Init() {
 			var totalOrders = 0;
 			_orderSets = new Stack<List<Order>>();
+			_spawnedCustomers = new List<Customer>();
 			for ( var i = 0; i < CustomersTargetNumber; i++ ) {
 				var orders = new List<Order>();
 				var ordersNum = Random.Range(1, 4);
@@ -128,6 +130,7 @@ namespace CookingPrototype.Controllers {
 				return;
 			}
 			place.Free();
+			_spawnedCustomers.Remove(customer);
 			GameplayController.Instance.CheckGameFinish();
 		}
 
@@ -138,8 +141,29 @@ namespace CookingPrototype.Controllers {
 		/// </summary>
 		/// <param name="order">Заказ, который пытаемся отдать</param>
 		/// <returns>Флаг - результат, удалось ли успешно отдать заказ</returns>
-		public bool ServeOrder(Order order) {
-			throw  new NotImplementedException("ServeOrder: this feature is not implemented.");
-		}
+		public bool ServeOrder(Order order) 
+		{
+			Customer minCustomer = new Customer();
+			float minTime = float.MaxValue;
+
+			foreach(var customer in _spawnedCustomers)
+			{
+				if (customer.WaitTime < minTime && customer.IsOrder(order))
+				{
+					minCustomer = customer;
+					minTime = customer.WaitTime;
+				}
+			}
+
+			if (minCustomer != null)
+				minCustomer.ServeOrder(order);
+			else 
+				return false;
+
+			if (!minCustomer.CheckForOrders)
+				FreeCustomer(minCustomer);
+
+			return true;
+        }
 	}
 }

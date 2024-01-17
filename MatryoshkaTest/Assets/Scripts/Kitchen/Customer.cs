@@ -28,6 +28,8 @@ namespace CookingPrototype.Kitchen {
 		/// Есть ли необслуженные заказы у указанного посетителя.
 		/// </summary>
 		public bool IsComplete { get { return _orders.Count == 0; } }
+		public bool IsOrder(Order order) => _orders.Contains(order);
+		public bool CheckForOrders => _orders.Count > 0;
 
 		void Update() {
 			if ( !_isActive ) {
