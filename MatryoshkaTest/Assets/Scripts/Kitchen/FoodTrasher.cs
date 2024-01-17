@@ -21,7 +21,8 @@ namespace CookingPrototype.Kitchen {
 		/// </summary>
 		[UsedImplicitly]
 		public void TryTrashFood() {
-			throw new NotImplementedException("TryTrashFood: this feature is not implemented");
+			if (!_place.IsFree && _place.CurFood.CurStatus == Food.FoodStatus.Overcooked)
+				_place.FreePlace();
 		}
 	}
 }
