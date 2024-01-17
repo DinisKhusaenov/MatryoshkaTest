@@ -67,9 +67,9 @@ namespace CookingPrototype.Kitchen {
 			CurFood = food;
 			if ( Cook && CurFood.CurStatus != (Food.FoodStatus.Overcooked) ) {
 				IsCooking = true;
-			}
+            }
 
-			FoodPlaceUpdated?.Invoke();
+            FoodPlaceUpdated?.Invoke();
 			return true;
 		}
 
