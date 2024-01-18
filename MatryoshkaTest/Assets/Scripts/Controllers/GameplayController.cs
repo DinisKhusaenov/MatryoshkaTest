@@ -1,10 +1,7 @@
 using System;
-
 using UnityEngine;
-
 using CookingPrototype.Kitchen;
 using CookingPrototype.UI;
-
 using JetBrains.Annotations;
 
 namespace CookingPrototype.Controllers {
@@ -14,7 +11,7 @@ namespace CookingPrototype.Controllers {
 		public GameObject TapBlock   = null;
 		public WinWindow  WinWindow  = null;
 		public LoseWindow LoseWindow = null;
-
+		public StartWindow StartWindow = null;
 
 		int _ordersTarget = 0;
 
@@ -26,7 +23,7 @@ namespace CookingPrototype.Controllers {
 			}
 		}
 
-		public int        TotalOrdersServed { get; private set; } = 0;
+		public int TotalOrdersServed { get; private set; } = 0;
 
 		public event Action TotalOrdersServedChanged;
 
@@ -35,6 +32,8 @@ namespace CookingPrototype.Controllers {
 				Debug.LogError("Another instance of GameplayController already exists");
 			}
 			Instance = this;
+
+			Init();
 		}
 
 		void OnDestroy() {
@@ -43,10 +42,19 @@ namespace CookingPrototype.Controllers {
 			}
 		}
 
-		void Init() {
-			TotalOrdersServed = 0;
-			Time.timeScale = 1f;
-			TotalOrdersServedChanged?.Invoke();
+		private void OnEnable()
+		{
+			StartWindow.PlayClicked += StartGame;
+		}
+
+        private void OnDisable()
+        {
+            StartWindow.PlayClicked -= StartGame;
+        }
+
+        void Init() {
+			Time.timeScale = 0f;
+			StartWindow.Show();
 		}
 
 		public void CheckGameFinish() {
@@ -54,6 +62,15 @@ namespace CookingPrototype.Controllers {
 				EndGame(TotalOrdersServed >= OrdersTarget);
 			}
 		}
+
+		private void StartGame(int victoryCondition)
+		{
+			Time.timeScale = 1f;
+			StartWindow.Hide();
+			Debug.Log(victoryCondition);
+            OrdersTarget = victoryCondition;
+            TotalOrdersServedChanged?.Invoke();
+        }
 
 		void EndGame(bool win) {
 			Time.timeScale = 0f;
